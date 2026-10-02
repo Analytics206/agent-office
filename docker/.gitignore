@@ -1,0 +1,2 @@
+# Passwords and tokens for the local container (copy .env.example).
+.env
