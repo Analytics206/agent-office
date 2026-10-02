@@ -1,0 +1,33 @@
+# Agent Office on your own computer, in Docker. From the repository root:
+#
+#   docker compose -f docker/compose.yaml up -d --build
+#
+# then open http://localhost:4600. Settings go in docker/.env (copy docker/.env.example).
+# See docker/README.md.
+name: agent-office
+
+services:
+  office:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: agent-office:local
+    restart: unless-stopped
+    ports:
+      # Only this computer: localhost is a secure origin, so voice and screen sharing work over
+      # plain http. Drop the "127.0.0.1:" to let your network in (they'd need https for voice).
+      - "127.0.0.1:${OFFICE_HOST_PORT:-4600}:4600"
+    # Everything in docker/.env reaches the office, and nothing that isn't set there.
+    env_file:
+      - path: .env
+        required: false
+    # Extra agent-office options, e.g. ["--self-signed"] or ["--agent-args", "--model opus"]
+    command: []
+    volumes:
+      - office-data:/data
+      # To keep the projects in a folder on this computer instead of on the volume, uncomment this.
+      # On Windows and macOS a bind mount is much slower than the volume for npm and git.
+      # - ../../office-workspace:/data/home/workspace
+
+volumes:
+  office-data:
